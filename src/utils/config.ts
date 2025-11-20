@@ -8,7 +8,13 @@ const config = ref<EnfyraConfig>({
 
 export function useEnfyraConfig() {
   const setConfig = (newConfig: Partial<EnfyraConfig>) => {
-    config.value = { ...config.value, ...newConfig };
+    const normalizedConfig = { ...newConfig };
+
+    if (typeof normalizedConfig.apiUrl === 'string') {
+      normalizedConfig.apiUrl = normalizedConfig.apiUrl.replace(/\/+$/, '');
+    }
+
+    config.value = { ...config.value, ...normalizedConfig };
   };
 
   const getConfig = () => config.value;
