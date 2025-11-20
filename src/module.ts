@@ -16,9 +16,17 @@ export default defineNuxtModule({
     apiUrl: "",
   },
   setup(options, nuxt) {
+    const normalizedOptions = {
+      ...options,
+      apiUrl:
+        typeof options.apiUrl === "string"
+          ? options.apiUrl.replace(/\/+$/, "")
+          : options.apiUrl,
+    };
+
     const { resolve } = createResolver(import.meta.url);
 
-    if (!options.apiUrl) {
+    if (!normalizedOptions.apiUrl) {
       console.warn(
         `[Enfyra SDK Nuxt] Missing required configuration:\n` +
           `- apiUrl is required\n` +
@@ -29,20 +37,20 @@ export default defineNuxtModule({
       );
       
       nuxt.options.runtimeConfig.public.enfyraSDK = {
-        ...options,
+        ...normalizedOptions,
         apiPrefix: ENFYRA_API_PREFIX,
         configError: true,
         configErrorMessage: 'Enfyra SDK: apiUrl is required. Please configure it in nuxt.config.ts'
       };
     } else {
       nuxt.options.runtimeConfig.public.enfyraSDK = {
-        ...options,
+        ...normalizedOptions,
         apiPrefix: ENFYRA_API_PREFIX,
       };
     }
 
 
-    if (!options.apiUrl) {
+    if (!normalizedOptions.apiUrl) {
       addPlugin({
         src: resolve("./runtime/plugin/config-error.client"),
         mode: 'client'
