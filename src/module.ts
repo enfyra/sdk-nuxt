@@ -14,6 +14,7 @@ export default defineNuxtModule({
   },
   defaults: {
     apiUrl: "",
+    apiPrefix: ENFYRA_API_PREFIX,
   },
   setup(options, nuxt) {
     const normalizedOptions = {
@@ -22,8 +23,15 @@ export default defineNuxtModule({
         typeof options.apiUrl === "string"
           ? options.apiUrl.replace(/\/+$/, "")
           : options.apiUrl,
+      apiPrefix:
+        typeof options.apiPrefix === "string"
+          ? (options.apiPrefix.trim() 
+              ? "/" + options.apiPrefix.replace(/^\/+|\/+$/g, "").replace(/\/+/g, "/")
+              : ENFYRA_API_PREFIX)
+          : ENFYRA_API_PREFIX,
     };
 
+    const apiPrefix = normalizedOptions.apiPrefix;
     const { resolve } = createResolver(import.meta.url);
 
     if (!normalizedOptions.apiUrl) {
@@ -38,14 +46,14 @@ export default defineNuxtModule({
       
       nuxt.options.runtimeConfig.public.enfyraSDK = {
         ...normalizedOptions,
-        apiPrefix: ENFYRA_API_PREFIX,
+        apiPrefix: apiPrefix,
         configError: true,
         configErrorMessage: 'Enfyra SDK: apiUrl is required. Please configure it in nuxt.config.ts'
       };
     } else {
       nuxt.options.runtimeConfig.public.enfyraSDK = {
         ...normalizedOptions,
-        apiPrefix: ENFYRA_API_PREFIX,
+        apiPrefix: apiPrefix,
       };
     }
 
@@ -65,13 +73,13 @@ export default defineNuxtModule({
     });
 
     addServerHandler({
-      route: `${ENFYRA_API_PREFIX}/login`,
+      route: `${apiPrefix}/login`,
       handler: resolve("./runtime/server/api/login.post"),
       method: "post",
     });
 
     addServerHandler({
-      route: `${ENFYRA_API_PREFIX}/logout`,
+      route: `${apiPrefix}/logout`,
       handler: resolve("./runtime/server/api/logout.post"),
       method: "post",
     });
@@ -83,7 +91,7 @@ export default defineNuxtModule({
     });
 
     addServerHandler({
-      route: `${ENFYRA_API_PREFIX}/**`,
+      route: `${apiPrefix}/**`,
       handler: resolve("./runtime/server/api/all"),
     });
   },

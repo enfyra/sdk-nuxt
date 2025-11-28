@@ -13,6 +13,7 @@ import {
   REFRESH_TOKEN_KEY,
   EXP_TIME_KEY,
 } from "../../../constants/auth";
+import { normalizeUrl } from "../../../utils/url";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -20,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const body = await readBody(event);
-    const response = await $fetch<any>(`${apiUrl}/auth/login`, {
+    const response = await $fetch<any>(normalizeUrl(apiUrl, "/auth/login"), {
       method: "POST",
       body,
       headers: {

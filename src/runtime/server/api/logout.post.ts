@@ -6,6 +6,7 @@ import {
   REFRESH_TOKEN_KEY,
   EXP_TIME_KEY,
 } from "../../../constants/auth";
+import { normalizeUrl } from "../../../utils/url";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const refreshToken = getCookie(event, REFRESH_TOKEN_KEY);
 
   try {
-    const result = await $fetch(`${apiUrl}/auth/logout`, {
+    const result = await $fetch(normalizeUrl(apiUrl, "/auth/logout"), {
       method: "POST",
       headers: {
         cookie: getHeader(event, "cookie") || "",

@@ -8,7 +8,7 @@ import type {
   BatchProgress,
 } from "../types";
 import { $fetch } from "../utils/http";
-import { getAppUrl } from "../utils/url";
+import { getAppUrl, normalizeUrl } from "../utils/url";
 import { ENFYRA_API_PREFIX } from "../constants/config";
 
 import { useRuntimeConfig, useFetch, useRequestHeaders } from "#imports";
@@ -59,8 +59,11 @@ export function useEnfyraApi<T = any>(
       .replace(/^\/+/, "");
 
     const appUrl = getAppUrl();
-    const finalUrl =
-      appUrl + (config?.apiPrefix || ENFYRA_API_PREFIX) + "/" + basePath;
+    const finalUrl = normalizeUrl(
+      appUrl,
+      config?.apiPrefix || ENFYRA_API_PREFIX,
+      basePath
+    );
 
     const clientHeaders = process.client
       ? {}
@@ -141,7 +144,7 @@ export function useEnfyraApi<T = any>(
         return segments.filter(Boolean).join("/");
       };
 
-      const fullBaseURL = apiUrl + (apiPrefix || ENFYRA_API_PREFIX);
+      const fullBaseURL = normalizeUrl(apiUrl, apiPrefix || ENFYRA_API_PREFIX);
 
       async function processBatch<T>(
         items: any[],

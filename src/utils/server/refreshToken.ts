@@ -5,6 +5,7 @@ import {
   REFRESH_TOKEN_KEY,
   EXP_TIME_KEY,
 } from "../../constants/auth";
+import { normalizeUrl } from "../../utils/url";
 
 interface TokenValidationResult {
   accessToken: string | null;
@@ -58,7 +59,7 @@ export async function refreshAccessToken(
   apiUrl: string
 ): Promise<string> {
   try {
-    const response = await $fetch(`${apiUrl}/auth/refresh-token`, {
+    const response = await $fetch(normalizeUrl(apiUrl, "/auth/refresh-token"), {
       method: "POST",
       body: { refreshToken },
     });
