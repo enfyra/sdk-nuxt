@@ -1,4 +1,4 @@
-import { setCookie, getCookie, type H3Event } from "h3";
+import { setCookie, getCookie, deleteCookie, type H3Event } from "h3";
 import { $fetch } from "ofetch";
 import {
   ACCESS_TOKEN_KEY,
@@ -84,6 +84,10 @@ export async function refreshAccessToken(
     return newAccessToken;
   } catch (error) {
     console.warn("Token refresh failed:", error);
+    // On refresh failure, clear all auth-related cookies at server side
+    deleteCookie(event, ACCESS_TOKEN_KEY);
+    deleteCookie(event, REFRESH_TOKEN_KEY);
+    deleteCookie(event, EXP_TIME_KEY);
     throw error;
   }
 }
