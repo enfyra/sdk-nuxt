@@ -92,11 +92,45 @@ export function useEnfyraApi<T = any>(
       },
     };
 
-    if (key) {
+    // Pass all useFetch-specific options
+    if (key !== undefined) {
       fetchOptions.key = key;
     }
-    if (opts.default) {
+    if (opts.default !== undefined) {
       fetchOptions.default = opts.default;
+    }
+    if (opts.server !== undefined) {
+      fetchOptions.server = opts.server;
+    }
+    if (opts.lazy !== undefined) {
+      fetchOptions.lazy = opts.lazy;
+    }
+    if (opts.immediate !== undefined) {
+      fetchOptions.immediate = opts.immediate;
+    }
+    if (opts.transform !== undefined) {
+      fetchOptions.transform = opts.transform;
+    }
+    if (opts.pick !== undefined) {
+      fetchOptions.pick = opts.pick;
+    }
+    if (opts.watch !== undefined) {
+      fetchOptions.watch = opts.watch;
+    }
+    if (opts.deep !== undefined) {
+      fetchOptions.deep = opts.deep;
+    }
+    if (opts.getCachedData !== undefined) {
+      fetchOptions.getCachedData = opts.getCachedData;
+    }
+    if (opts.refresh !== undefined) {
+      fetchOptions.refresh = opts.refresh;
+    }
+    if (opts.refreshInterval !== undefined) {
+      fetchOptions.refreshInterval = opts.refreshInterval;
+    }
+    if (opts.dedupe !== undefined) {
+      fetchOptions.dedupe = opts.dedupe;
     }
 
     return useFetch<T>(finalUrl, fetchOptions) as UseEnfyraApiSSRReturn<T>;

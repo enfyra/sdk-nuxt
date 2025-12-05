@@ -54,6 +54,28 @@ interface BaseApiOptions<T> {
   ssr?: boolean;
   /** Unique key for useFetch caching */
   key?: string;
+  /** Whether to fetch on server (default: true) - Only applies when ssr: true */
+  server?: boolean;
+  /** Don't block navigation (default: false) - Only applies when ssr: true */
+  lazy?: boolean;
+  /** Execute immediately (default: true) - Only applies when ssr: true */
+  immediate?: boolean;
+  /** Transform the response data - Only applies when ssr: true */
+  transform?: (data: any) => T;
+  /** Pick specific fields from response - Only applies when ssr: true */
+  pick?: string[];
+  /** Watch reactive sources and refetch when they change - Only applies when ssr: true */
+  watch?: any[];
+  /** Deep watch (default: false) - Only applies when ssr: true */
+  deep?: boolean;
+  /** Custom cache data retrieval function - Only applies when ssr: true */
+  getCachedData?: (key: string) => T | null;
+  /** Enable refresh (default: true) - Only applies when ssr: true */
+  refresh?: boolean;
+  /** Auto refresh interval in milliseconds - Only applies when ssr: true */
+  refreshInterval?: number;
+  /** Deduplication key - Only applies when ssr: true */
+  dedupe?: string;
 }
 
 interface BatchApiOptions {
