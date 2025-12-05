@@ -1,6 +1,6 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "description": "Nuxt SDK for Enfyra CMS",
   "repository": {
     "type": "git",

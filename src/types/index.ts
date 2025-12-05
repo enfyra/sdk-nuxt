@@ -117,11 +117,13 @@ export interface BackendErrorExtended extends BackendError {
 import type { Ref } from 'vue';
 import type { AsyncData } from 'nuxt/app';
 
-export interface UseEnfyraApiSSRReturn<T> extends AsyncData<T | null, ApiError> {
+export interface UseEnfyraApiSSRReturn<T> extends Omit<AsyncData<T | null, ApiError>, 'pending' | 'error'> {
   data: Ref<T | null>;
-  pending: Ref<boolean>;
-  error: Ref<ApiError | null>;
+  loading: Ref<boolean>;
+  error: Ref<ApiError | null>; // Use null instead of undefined for consistency
   refresh: () => Promise<void>;
+  // Keep pending for backward compatibility, but it's an alias of loading
+  pending?: Ref<boolean>;
 }
 
 interface BaseExecuteOptions {

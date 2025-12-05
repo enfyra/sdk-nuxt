@@ -133,7 +133,15 @@ export function useEnfyraApi<T = any>(
       fetchOptions.dedupe = opts.dedupe;
     }
 
-    return useFetch<T>(finalUrl, fetchOptions) as UseEnfyraApiSSRReturn<T>;
+    const result = useFetch<T>(finalUrl, fetchOptions);
+    
+    // Map pending to loading for better naming
+    // useFetch returns AsyncData with 'pending', but UseEnfyraApiSSRReturn uses 'loading'
+    return {
+      ...result,
+      loading: result.pending,
+      pending: result.pending, // Keep for backward compatibility
+    } as UseEnfyraApiSSRReturn<T>;
   }
   const data = ref<T | null>(null);
   const error = ref<ApiError | null>(null);
