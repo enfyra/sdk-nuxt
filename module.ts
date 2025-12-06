@@ -65,7 +65,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     if (!normalizedOptions.apiUrl) {
       addPlugin({
-        src: resolve("./src/runtime/plugin/config-error.client"),
+        src: resolve("./dist/runtime/plugin/config-error.client.mjs"),
         mode: 'client'
       });
     }
@@ -79,31 +79,31 @@ export default defineNuxtModule<ModuleOptions>({
     })
 
     addServerHandler({
-      handler: '@enfyra/sdk-nuxt/src/runtime/server/middleware/auth',
+      handler: resolve('./dist/runtime/server/middleware/auth.mjs'),
       middleware: true,
     });
 
     addServerHandler({
       route: `${apiPrefix}/login`,
-      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/login.post',
+      handler: resolve('./dist/runtime/server/api/login.post.mjs'),
       method: "post",
     });
 
     addServerHandler({
       route: `${apiPrefix}/logout`,
-      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/logout.post',
+      handler: resolve('./dist/runtime/server/api/logout.post.mjs'),
       method: "post",
     });
 
 
     addServerHandler({
       route: "/assets/**",
-      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/all',
+      handler: resolve('./dist/runtime/server/api/all.mjs'),
     });
 
     addServerHandler({
       route: `${apiPrefix}/**`,
-      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/all',
+      handler: resolve('./dist/runtime/server/api/all.mjs'),
     });
   },
 });

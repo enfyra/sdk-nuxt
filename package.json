@@ -1,6 +1,6 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "0.3.17",
+  "version": "0.3.18",
   "description": "Nuxt SDK for Enfyra CMS",
   "repository": {
     "type": "git",
@@ -42,7 +42,8 @@
     "module.ts",
     "module.d.ts",
     "index.ts",
-    "src/**/*"
+    "src/**/*",
+    "dist/runtime/**/*"
   ],
   "keywords": [
     "nuxt",
@@ -56,7 +57,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "npx tsc --noEmit --skipLibCheck"
+    "build": "unbuild && npx tsc --noEmit --skipLibCheck",
+    "prepublishOnly": "unbuild"
   },
   "peerDependencies": {
     "@nuxt/kit": "^3.18.1",
@@ -69,6 +71,7 @@
   "devDependencies": {
     "@types/node": "^24.10.1",
     "nuxt": "^3.18.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "unbuild": "^2.0.0"
   }
 }
