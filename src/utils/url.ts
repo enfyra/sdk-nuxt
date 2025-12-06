@@ -37,9 +37,6 @@ export function joinUrlPath(...paths: (string | undefined | null)[]): string {
     .join('/');
 }
 
-// Import from #imports at top level
-import { useRequestHeaders, useRequestURL } from '#imports';
-
 export function getAppUrl(): string {
   if (process.client && typeof window !== 'undefined') {
     return window.location.origin;
@@ -47,13 +44,23 @@ export function getAppUrl(): string {
   
   if (process.server) {
     try {
+      let useRequestHeaders: any;
+      let useRequestURL: any;
+      
+      try {
+        const imports = eval('require("#imports")');
+        useRequestHeaders = imports.useRequestHeaders;
+        useRequestURL = imports.useRequestURL;
+      } catch (e) {
+        return '';
+      }
+      
       try {
         const url = useRequestURL();
         if (url) {
           return `${url.protocol}//${url.host}`;
         }
       } catch (e) {
-        // useRequestURL might not be available in all contexts
       }
       
       const headers = useRequestHeaders();

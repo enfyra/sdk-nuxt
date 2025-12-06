@@ -2,18 +2,34 @@ import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
   failOnWarn: false,
-  externals: ["@nuxt/kit", "h3", "ofetch"],
+  externals: ["@nuxt/kit"],
   entries: [
+    "src/module",
     {
       input: "src/runtime/",
       outDir: "dist/runtime",
       format: "esm",
     },
+    {
+      input: "src/composables/",
+      outDir: "dist/composables",
+      format: "esm",
+      declaration: true,
+    },
+    {
+      input: "src/constants/",
+      outDir: "dist/constants",
+      format: "esm",
+    },
+    {
+      input: "src/utils/",
+      outDir: "dist/utils",
+      format: "esm",
+    },
   ],
-  declaration: false,
-  clean: false,
+  declaration: true,
+  clean: true,
   rollup: {
-    emitCJS: false,
+    emitCJS: true,
   },
 });
-

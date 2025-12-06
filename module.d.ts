@@ -1,4 +1,4 @@
-import type { ModuleOptions } from './module'
+import type { ModuleOptions } from './src/module'
 
 declare module '@nuxt/schema' {
   interface NuxtConfig {
@@ -9,6 +9,6 @@ declare module '@nuxt/schema' {
   }
 }
 
-export type { ModuleOptions } from './module'
+export type { ModuleOptions } from './src/module'
 export type * from './src/types'
 
