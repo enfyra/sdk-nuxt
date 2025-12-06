@@ -3,6 +3,11 @@
  * These are provided at runtime by Nuxt but need declarations for TypeScript
  */
 
+declare global {
+  const useEnfyraApi: typeof import('../composables/useEnfyraApi').useEnfyraApi
+  const useEnfyraAuth: typeof import('../composables/useEnfyraAuth').useEnfyraAuth
+}
+
 declare module '#imports' {
   export const useRuntimeConfig: () => {
     public: {

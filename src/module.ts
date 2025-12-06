@@ -7,7 +7,12 @@ import {
 } from "@nuxt/kit";
 import { ENFYRA_API_PREFIX } from "./constants/config";
 
-export default defineNuxtModule({
+export interface ModuleOptions {
+  apiUrl: string;
+  apiPrefix?: string;
+}
+
+export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: "@enfyra/sdk-nuxt",
     configKey: "enfyraSDK",
@@ -66,6 +71,12 @@ export default defineNuxtModule({
     }
     
     addImportsDir(resolve("./composables"));
+
+    nuxt.hook('prepare:types', ({ declarations, references }: any) => {
+      references.push({
+        path: resolve('./types/nuxt-imports.d.ts'),
+      })
+    })
 
     addServerHandler({
       handler: resolve("./runtime/server/middleware/auth"),

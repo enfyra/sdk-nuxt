@@ -1,6 +1,6 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "description": "Nuxt SDK for Enfyra CMS",
   "repository": {
     "type": "git",
@@ -11,17 +11,31 @@
   },
   "homepage": "https://github.com/dothinh115/enfyra-sdk-nuxt#readme",
   "main": "./dist/module.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types.d.ts",
   "exports": {
     ".": {
       "import": "./dist/module.mjs",
       "require": "./dist/module.cjs",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/types.d.ts"
+    },
+    "./src/composables/useEnfyraApi": {
+      "types": "./src/composables/useEnfyraApi.ts",
+      "import": "./src/composables/useEnfyraApi.ts"
+    },
+    "./src/composables/useEnfyraAuth": {
+      "types": "./src/composables/useEnfyraAuth.ts",
+      "import": "./src/composables/useEnfyraAuth.ts"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
     }
   },
   "files": [
     "dist/",
-    "src/"
+    "src/",
+    "module.d.ts",
+    "index.ts"
   ],
   "keywords": [
     "nuxt",
@@ -36,8 +50,8 @@
   },
   "scripts": {
     "dev": "nuxi dev playground",
-    "build": "nuxt-module-build build && npx tsc -p tsconfig.build.json && node scripts/copy-composables-types.js",
-    "prepack": "nuxt-module-build build && npx tsc -p tsconfig.build.json && node scripts/copy-composables-types.js",
+    "build": "nuxt-module-build build && npx tsc -p tsconfig.build.json",
+    "prepack": "nuxt-module-build build && npx tsc -p tsconfig.build.json",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run"
