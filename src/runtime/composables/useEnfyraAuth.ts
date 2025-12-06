@@ -1,5 +1,5 @@
 import { ref, computed } from "vue";
-import type { LoginPayload, User, UseEnfyraAuthReturn } from "../types/auth";
+import type { LoginPayload, User, UseEnfyraAuthReturn } from "../../types/auth";
 import { useEnfyraApi } from "./useEnfyraApi";
 
 const me = ref<User | null>(null);
@@ -33,7 +33,7 @@ export function useEnfyraAuth() {
 
     try {
       const queryParams: any = {};
-      
+
       if (options?.fields && options.fields.length > 0) {
         queryParams.fields = options.fields.join(",");
       }

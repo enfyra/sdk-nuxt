@@ -3,8 +3,8 @@ import { useRuntimeConfig } from "#imports";
 import {
   validateTokens,
   refreshAccessToken,
-} from "../../../utils/server/refreshToken";
-import { REFRESH_TOKEN_KEY } from "../../../constants/auth";
+} from "../../utils/server/refreshToken";
+import { REFRESH_TOKEN_KEY } from "../../constants/auth";
 
 export default defineEventHandler(async (event) => {
   if (

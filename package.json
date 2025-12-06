@@ -1,6 +1,7 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "0.3.19",
+  "version": "0.3.20",
+  "type": "module",
   "description": "Nuxt SDK for Enfyra CMS",
   "repository": {
     "type": "git",
@@ -18,17 +19,13 @@
       "require": "./dist/module.cjs",
       "types": "./dist/types.d.ts"
     },
-    "./src/composables/useEnfyraApi": {
-      "types": "./src/composables/useEnfyraApi.ts",
-      "import": "./src/composables/useEnfyraApi.ts"
-    },
-    "./src/composables/useEnfyraAuth": {
-      "types": "./src/composables/useEnfyraAuth.ts",
-      "import": "./src/composables/useEnfyraAuth.ts"
+    "./runtime/*": {
+      "types": "./dist/runtime/*.d.ts",
+      "import": "./dist/runtime/*.js"
     },
     "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
   "files": [
@@ -61,6 +58,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
+    "defu": "^6.1.4",
     "h3": "^1.15.4",
     "ofetch": "^1.3.3"
   },

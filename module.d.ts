@@ -1,14 +1,24 @@
-import type { ModuleOptions } from './src/module'
+import type { ModuleOptions } from "./src/module";
 
-declare module '@nuxt/schema' {
+declare module "@nuxt/schema" {
   interface NuxtConfig {
-    enfyraSDK?: ModuleOptions
+    enfyraSDK?: ModuleOptions;
   }
   interface NuxtOptions {
-    enfyraSDK?: ModuleOptions
+    enfyraSDK?: ModuleOptions;
+  }
+  interface PublicRuntimeConfig {
+    enfyraSDK?: ModuleOptions & {
+      configError?: boolean;
+      configErrorMessage?: string;
+    };
   }
 }
 
-export type { ModuleOptions } from './src/module'
-export type * from './src/types'
+declare module "#imports" {
+  export const useEnfyraApi: typeof import("./src/runtime/composables/useEnfyraApi").useEnfyraApi;
+  export const useEnfyraAuth: typeof import("./src/runtime/composables/useEnfyraAuth").useEnfyraAuth;
+}
 
+export type { ModuleOptions } from "./src/module";
+export type * from "./src/types";

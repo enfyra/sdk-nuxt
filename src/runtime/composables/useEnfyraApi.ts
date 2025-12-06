@@ -6,7 +6,7 @@ import type {
   UseEnfyraApiSSRReturn,
   UseEnfyraApiClientReturn,
   BatchProgress,
-} from "../types";
+} from "../../types";
 import { $fetch } from "../utils/http";
 import { getAppUrl, normalizeUrl } from "../utils/url";
 import { ENFYRA_API_PREFIX } from "../constants/config";
@@ -68,13 +68,13 @@ export function useEnfyraApi<T = any>(
     const clientHeaders = process.client
       ? {}
       : useRequestHeaders([
-          "authorization",
-          "cookie",
-          "user-agent",
-          "accept",
-          "accept-language",
-          "referer",
-        ]);
+        "authorization",
+        "cookie",
+        "user-agent",
+        "accept",
+        "accept-language",
+        "referer",
+      ]);
 
     const serverHeaders = { ...clientHeaders };
     delete serverHeaders.connection;
@@ -83,7 +83,7 @@ export function useEnfyraApi<T = any>(
     delete serverHeaders["content-length"];
 
     const nuxtApp = useNuxtApp()
-    
+
     const fetchOptions: any = {
       method: method as any,
       body: body,
@@ -141,7 +141,7 @@ export function useEnfyraApi<T = any>(
     }
 
     const result = useFetch<T>(finalUrl, fetchOptions);
-    
+
     // Map pending to loading for better naming
     // useFetch returns AsyncData with 'pending', but UseEnfyraApiSSRReturn uses 'loading'
     return {
@@ -207,13 +207,13 @@ export function useEnfyraApi<T = any>(
 
         const chunks = effectiveBatchSize
           ? Array.from(
-              { length: Math.ceil(items.length / effectiveBatchSize) },
-              (_, i) =>
-                items.slice(
-                  i * effectiveBatchSize,
-                  i * effectiveBatchSize + effectiveBatchSize
-                )
-            )
+            { length: Math.ceil(items.length / effectiveBatchSize) },
+            (_, i) =>
+              items.slice(
+                i * effectiveBatchSize,
+                i * effectiveBatchSize + effectiveBatchSize
+              )
+          )
           : [items];
 
         const totalBatches = chunks.length;

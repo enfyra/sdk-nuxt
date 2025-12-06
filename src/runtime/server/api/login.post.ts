@@ -12,8 +12,8 @@ import {
   ACCESS_TOKEN_KEY,
   REFRESH_TOKEN_KEY,
   EXP_TIME_KEY,
-} from "../../../constants/auth";
-import { normalizeUrl } from "../../../utils/url";
+} from "../../constants/auth";
+import { normalizeUrl } from "../../utils/url";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();

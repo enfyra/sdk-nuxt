@@ -1,7 +1,7 @@
 import { H3Event, proxyRequest } from "h3";
 import { useRuntimeConfig } from "#imports";
 import { ENFYRA_API_PREFIX } from "../../constants/config";
-import { normalizeUrl } from "../../utils/url";
+import { normalizeUrl } from "../url";
 
 export function proxyToAPI(event: H3Event, customPath?: string) {
   const config = useRuntimeConfig();
