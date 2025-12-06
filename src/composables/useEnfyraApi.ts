@@ -11,7 +11,7 @@ import { $fetch } from "../utils/http";
 import { getAppUrl, normalizeUrl } from "../utils/url";
 import { ENFYRA_API_PREFIX } from "../constants/config";
 
-import { useRuntimeConfig, useFetch, useRequestHeaders } from "#imports";
+import { useRuntimeConfig, useFetch, useRequestHeaders, useNuxtApp } from "#imports";
 
 function handleError(
   error: any,
@@ -82,6 +82,8 @@ export function useEnfyraApi<T = any>(
     delete serverHeaders.host;
     delete serverHeaders["content-length"];
 
+    const nuxtApp = useNuxtApp()
+    
     const fetchOptions: any = {
       method: method as any,
       body: body,
@@ -122,6 +124,11 @@ export function useEnfyraApi<T = any>(
     }
     if (opts.getCachedData !== undefined) {
       fetchOptions.getCachedData = opts.getCachedData;
+    } else {
+      // Auto-add getCachedData to ensure cache is used in SPA navigation
+      fetchOptions.getCachedData = (cacheKey: string) => {
+        return nuxtApp.payload.data[cacheKey] || nuxtApp.static.data[cacheKey]
+      }
     }
     if (opts.refresh !== undefined) {
       fetchOptions.refresh = opts.refresh;

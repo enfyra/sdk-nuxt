@@ -25,6 +25,18 @@ declare module '#imports' {
     options?: any
   ) => any;
   
+  export const useNuxtApp: () => {
+    payload: {
+      data: Record<string, any>;
+      [key: string]: any;
+    };
+    static: {
+      data: Record<string, any>;
+      [key: string]: any;
+    };
+    [key: string]: any;
+  };
+  
   export const defineNuxtPlugin: (plugin: any) => any;
   
   export const defineCachedEventHandler: (handler: any, options?: any) => any;

@@ -1,6 +1,6 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "0.3.14",
+  "version": "0.3.15",
   "description": "Nuxt SDK for Enfyra CMS",
   "repository": {
     "type": "git",
@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@nuxt/module-builder": "^0.8.4",
+    "@types/node": "^24.10.1",
     "@vitest/ui": "^3.2.4",
     "nuxt": "^3.18.1",
     "typescript": "^5.0.0",
