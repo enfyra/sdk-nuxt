@@ -5,7 +5,7 @@ import {
   addImportsDir,
   addPlugin,
 } from "@nuxt/kit";
-import { ENFYRA_API_PREFIX } from "./constants/config";
+import { ENFYRA_API_PREFIX } from "./src/constants/config";
 
 export interface ModuleOptions {
   apiUrl: string;
@@ -65,45 +65,46 @@ export default defineNuxtModule<ModuleOptions>({
 
     if (!normalizedOptions.apiUrl) {
       addPlugin({
-        src: resolve("./runtime/plugin/config-error.client"),
+        src: resolve("./src/runtime/plugin/config-error.client"),
         mode: 'client'
       });
     }
     
-    addImportsDir(resolve("./composables"));
+    addImportsDir(resolve("./src/composables"));
 
     nuxt.hook('prepare:types', ({ declarations, references }: any) => {
       references.push({
-        path: resolve('./types/nuxt-imports.d.ts'),
+        path: resolve('./src/types/nuxt-imports.d.ts'),
       })
     })
 
     addServerHandler({
-      handler: resolve("./runtime/server/middleware/auth"),
+      handler: '@enfyra/sdk-nuxt/src/runtime/server/middleware/auth',
       middleware: true,
     });
 
     addServerHandler({
       route: `${apiPrefix}/login`,
-      handler: resolve("./runtime/server/api/login.post"),
+      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/login.post',
       method: "post",
     });
 
     addServerHandler({
       route: `${apiPrefix}/logout`,
-      handler: resolve("./runtime/server/api/logout.post"),
+      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/logout.post',
       method: "post",
     });
 
 
     addServerHandler({
       route: "/assets/**",
-      handler: resolve("./runtime/server/api/all"),
+      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/all',
     });
 
     addServerHandler({
       route: `${apiPrefix}/**`,
-      handler: resolve("./runtime/server/api/all"),
+      handler: '@enfyra/sdk-nuxt/src/runtime/server/api/all',
     });
   },
 });
+

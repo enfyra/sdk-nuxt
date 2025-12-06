@@ -22,6 +22,9 @@
     "outDir": "./dist"
   },
   "include": [
+    "module.ts",
+    "module.d.ts",
+    "index.ts",
     "src/**/*",
     "src/types/**/*.d.ts"
   ],

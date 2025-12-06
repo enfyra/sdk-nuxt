@@ -1,6 +1,6 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "0.3.16",
+  "version": "0.3.17",
   "description": "Nuxt SDK for Enfyra CMS",
   "repository": {
     "type": "git",
@@ -10,13 +10,12 @@
     "url": "https://github.com/dothinh115/enfyra-sdk-nuxt/issues"
   },
   "homepage": "https://github.com/dothinh115/enfyra-sdk-nuxt#readme",
-  "main": "./dist/module.mjs",
-  "types": "./dist/types.d.ts",
+  "main": "./module.ts",
+  "types": "./module.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/module.mjs",
-      "require": "./dist/module.cjs",
-      "types": "./dist/types.d.ts"
+      "types": "./module.d.ts",
+      "import": "./module.ts"
     },
     "./src/composables/useEnfyraApi": {
       "types": "./src/composables/useEnfyraApi.ts",
@@ -26,16 +25,24 @@
       "types": "./src/composables/useEnfyraAuth.ts",
       "import": "./src/composables/useEnfyraAuth.ts"
     },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.js"
-    }
+    "./src/types": {
+      "types": "./src/types/index.ts",
+      "import": "./src/types/index.ts"
+    },
+    "./src/runtime/server/api/all": "./src/runtime/server/api/all.ts",
+    "./src/runtime/server/api/all.ts": "./src/runtime/server/api/all.ts",
+    "./src/runtime/server/api/login.post": "./src/runtime/server/api/login.post.ts",
+    "./src/runtime/server/api/login.post.ts": "./src/runtime/server/api/login.post.ts",
+    "./src/runtime/server/api/logout.post": "./src/runtime/server/api/logout.post.ts",
+    "./src/runtime/server/api/logout.post.ts": "./src/runtime/server/api/logout.post.ts",
+    "./src/runtime/server/middleware/auth": "./src/runtime/server/middleware/auth.ts",
+    "./src/runtime/server/middleware/auth.ts": "./src/runtime/server/middleware/auth.ts"
   },
   "files": [
-    "dist/",
-    "src/",
+    "module.ts",
     "module.d.ts",
-    "index.ts"
+    "index.ts",
+    "src/**/*"
   ],
   "keywords": [
     "nuxt",
@@ -49,12 +56,7 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "nuxi dev playground",
-    "build": "nuxt-module-build build && npx tsc -p tsconfig.build.json",
-    "prepack": "nuxt-module-build build && npx tsc -p tsconfig.build.json",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "build": "npx tsc --noEmit --skipLibCheck"
   },
   "peerDependencies": {
     "@nuxt/kit": "^3.18.1",
@@ -65,13 +67,8 @@
     "ofetch": "^1.3.3"
   },
   "devDependencies": {
-    "@nuxt/module-builder": "^0.8.4",
     "@types/node": "^24.10.1",
-    "@vitest/ui": "^3.2.4",
     "nuxt": "^3.18.1",
-    "typescript": "^5.0.0",
-    "vite": "^6.0.7",
-    "vite-plugin-dts": "^4.3.0",
-    "vitest": "^3.2.4"
+    "typescript": "^5.0.0"
   }
 }

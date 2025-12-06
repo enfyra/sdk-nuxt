@@ -1,3 +1,3 @@
-export * from './src/module'
+export * from './module'
 export * from './src/types'
 
