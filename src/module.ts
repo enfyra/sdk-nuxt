@@ -4,6 +4,7 @@ import {
   addServerHandler,
   addImports,
   addPlugin,
+  addTypeTemplate,
   useLogger,
 } from "@nuxt/kit";
 import { defu } from "defu";
@@ -86,7 +87,6 @@ export default defineNuxtModule<ModuleOptions>({
       });
     }
 
-    // Register composables for auto-import with explicit declarations
     addImports([
       {
         name: "useEnfyraApi",
@@ -97,8 +97,27 @@ export default defineNuxtModule<ModuleOptions>({
         from: resolve("./runtime/composables/useEnfyraAuth"),
       },
     ]);
+    addTypeTemplate({
+      filename: "types/enfyra-sdk.d.ts",
+      getContents: () => `
+import type { ApiOptions, UseEnfyraApiSSRReturn, UseEnfyraApiClientReturn } from '@enfyra/sdk-nuxt/types'
 
-    // Server handlers
+declare module '#imports' {
+  export function useEnfyraApi<T = any>(
+    path: (() => string) | string,
+    opts: ApiOptions<T> & { ssr: true }
+  ): UseEnfyraApiSSRReturn<T>
+
+  export function useEnfyraApi<T = any>(
+    path: (() => string) | string,
+    opts?: ApiOptions<T> & { ssr?: false | undefined }
+  ): UseEnfyraApiClientReturn<T>
+
+  export function useEnfyraAuth(): import('@enfyra/sdk-nuxt/types').UseEnfyraAuthReturn
+}
+`,
+    });
+
     addServerHandler({
       handler: resolve("./runtime/server/middleware/auth"),
       middleware: true,

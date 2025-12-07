@@ -1,4 +1,4 @@
-import { ref, unref, toRaw } from "vue";
+import { ref, unref, toRaw, computed } from "vue";
 import type {
   ApiOptions,
   ApiError,
@@ -94,7 +94,6 @@ export function useEnfyraApi<T = any>(
       },
     };
 
-    // Pass all useFetch-specific options
     if (key !== undefined) {
       fetchOptions.key = key;
     }
@@ -125,7 +124,6 @@ export function useEnfyraApi<T = any>(
     if (opts.getCachedData !== undefined) {
       fetchOptions.getCachedData = opts.getCachedData;
     } else {
-      // Auto-add getCachedData to ensure cache is used in SPA navigation
       fetchOptions.getCachedData = (cacheKey: string) => {
         return nuxtApp.payload.data[cacheKey] || nuxtApp.static.data[cacheKey]
       }
@@ -142,12 +140,12 @@ export function useEnfyraApi<T = any>(
 
     const result = useFetch<T>(finalUrl, fetchOptions);
 
-    // Map pending to loading for better naming
-    // useFetch returns AsyncData with 'pending', but UseEnfyraApiSSRReturn uses 'loading'
+    
+    const loading = computed(() => result.status.value === 'pending');
+
     return {
       ...result,
-      loading: result.pending,
-      pending: result.pending, // Keep for backward compatibility
+      loading,
     } as UseEnfyraApiSSRReturn<T>;
   }
   const data = ref<T | null>(null);

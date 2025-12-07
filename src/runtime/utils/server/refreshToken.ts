@@ -19,7 +19,6 @@ export function decodeJWT(token: string): any {
       return null;
     }
 
-    // Decode the payload (second part)
     const payload = parts[1];
     const decodedPayload = Buffer.from(payload, "base64url").toString("utf-8");
     return JSON.parse(decodedPayload);
@@ -35,7 +34,6 @@ export function isAccessTokenExpired(accessToken: string): boolean {
     return true;
   }
 
-  // JWT exp is in seconds, Date.now() is in milliseconds
   const expirationTime = decoded.exp * 1000;
   return Date.now() >= expirationTime;
 }
@@ -84,7 +82,6 @@ export async function refreshAccessToken(
     return newAccessToken;
   } catch (error) {
     console.warn("Token refresh failed:", error);
-    // On refresh failure, clear all auth-related cookies at server side
     deleteCookie(event, ACCESS_TOKEN_KEY);
     deleteCookie(event, REFRESH_TOKEN_KEY);
     deleteCookie(event, EXP_TIME_KEY);

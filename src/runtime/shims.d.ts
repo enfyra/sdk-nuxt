@@ -1,10 +1,4 @@
-/**
- * Type shims for Nuxt auto-imports used in module runtime.
- * These types are provided by Nuxt at runtime but need declarations for TypeScript.
- */
-
 declare module "#imports" {
-    // Nuxt composables
     export const useRuntimeConfig: () => {
         public: {
             enfyraSDK?: {
@@ -40,10 +34,8 @@ declare module "#imports" {
         [key: string]: any;
     };
 
-    // Nuxt plugin
     export const defineNuxtPlugin: (plugin: any) => any;
 
-    // Server utilities (from nitro)
     export const defineCachedEventHandler: (
         handler: any,
         options?: any

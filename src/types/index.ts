@@ -120,9 +120,8 @@ import type { AsyncData } from 'nuxt/app';
 export interface UseEnfyraApiSSRReturn<T> extends Omit<AsyncData<T | null, ApiError>, 'pending' | 'error'> {
   data: Ref<T | null>;
   loading: Ref<boolean>;
-  error: Ref<ApiError | null>; // Use null instead of undefined for consistency
+  error: Ref<ApiError | null>;
   refresh: () => Promise<void>;
-  // Keep pending for backward compatibility, but it's an alias of loading
   pending?: Ref<boolean>;
 }
 

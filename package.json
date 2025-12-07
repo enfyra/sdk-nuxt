@@ -1,16 +1,16 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "0.3.20",
+  "version": "0.3.21",
   "type": "module",
   "description": "Nuxt SDK for Enfyra CMS",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dothinh115/enfyra-sdk-nuxt.git"
+    "url": "https://github.com/enfyra/sdk-nuxt.git"
   },
   "bugs": {
-    "url": "https://github.com/dothinh115/enfyra-sdk-nuxt/issues"
+    "url": "https://github.com/enfyra/sdk-nuxt/issues"
   },
-  "homepage": "https://github.com/dothinh115/enfyra-sdk-nuxt#readme",
+  "homepage": "https://github.com/enfyra/sdk-nuxt#readme",
   "main": "./dist/module.mjs",
   "types": "./dist/types.d.ts",
   "exports": {
