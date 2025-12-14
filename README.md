@@ -1,17 +1,14 @@
 # @enfyra/sdk-nuxt
 
-Nuxt SDK for Enfyra CMS - A powerful composable-based API client with full SSR support and TypeScript integration.
+Nuxt SDK for Enfyra CMS - A lightweight composable-based API client with full TypeScript integration.
 
 ## Features
 
-✅ **SSR & Client-Side Support** - Automatic server-side rendering with `useFetch` or client-side with `$fetch`  
+✅ **Simple & Flexible** - Get base URL and build your own composables  
 ✅ **Authentication Integration** - Built-in auth composables with automatic header forwarding  
 ✅ **Asset Proxy** - Automatic `/assets/**` proxy to backend with no configuration needed  
 ✅ **TypeScript Support** - Full type safety with auto-generated declarations  
-✅ **Batch Operations** - Efficient bulk operations with real-time progress tracking (client-side)  
-✅ **Error Handling** - Automatic error management with console logging  
-✅ **Reactive State** - Built-in loading, error, and data states  
-✅ **Caching Support** - Optional cache keys for SSR mode optimization  
+✅ **SSR Ready** - Works seamlessly with Nuxt's `useFetch` and `$fetch`
 
 ## Installation
 
@@ -42,14 +39,25 @@ The SDK automatically detects your application URL:
 
 ## Quick Start
 
-### SSR Mode - Perfect for Page Data
+### Get Base URL
+
+```typescript
+// Get the base URL for your API requests
+const { baseUrl, apiPrefix } = useEnfyra();
+
+// baseUrl: "http://localhost:3001/enfyra/api"
+// apiPrefix: "/enfyra/api"
+```
+
+### Using with `useFetch` (SSR)
 
 ```typescript
 // pages/users.vue
 <script setup>
-// ✅ Automatic execution on server-side with caching (runs immediately, no execute() needed)
-const { data: users, pending, error, refresh } = useEnfyraApi('/users', {
-  ssr: true,
+const { baseUrl } = useEnfyra();
+
+// Use with Nuxt's useFetch for SSR support
+const { data: users, pending, error, refresh } = await useFetch(`${baseUrl}/users`, {
   key: 'users-list' // Optional cache key
 });
 </script>
@@ -67,16 +75,14 @@ const { data: users, pending, error, refresh } = useEnfyraApi('/users', {
 </template>
 ```
 
-### Client Mode - Perfect for User Interactions
+### Using with `$fetch` (Client)
 
 ```typescript
 // components/CreateUserForm.vue  
 <script setup>
-// ✅ Manual execution control for form submissions
-const { execute: createUser, pending, error } = useEnfyraApi('/users', {
-  method: 'post',
-  errorContext: 'Create User'
-});
+const { baseUrl } = useEnfyra();
+const pending = ref(false);
+const error = ref(null);
 
 const formData = reactive({
   name: '',
@@ -84,11 +90,22 @@ const formData = reactive({
 });
 
 async function handleSubmit() {
-  await createUser({ body: formData });
+  pending.value = true;
+  error.value = null;
   
-  if (!error.value) {
+  try {
+    const response = await $fetch(`${baseUrl}/users`, {
+      method: 'POST',
+      body: formData
+    });
+    
     toast.success('User created successfully!');
     await navigateTo('/users');
+  } catch (err) {
+    error.value = err;
+    toast.error('Failed to create user');
+  } finally {
+    pending.value = false;
   }
 }
 </script>
@@ -98,7 +115,7 @@ async function handleSubmit() {
 
 ```typescript
 <script setup>
-const { me, login, logout, isLoggedIn } = useEnfyraAuth();
+const { me, login, logout, fetchUser, isLoggedIn } = useEnfyraAuth();
 
 // Login
 await login({
@@ -109,6 +126,9 @@ await login({
 // Check auth status
 console.log('Logged in:', isLoggedIn.value);
 console.log('Current user:', me.value);
+
+// Fetch user with optional fields
+await fetchUser({ fields: ['id', 'email', 'role'] });
 
 // Logout  
 await logout();
@@ -139,69 +159,20 @@ The SDK automatically proxies all asset requests to your backend. Simply use `/a
 
 ## Core Composables
 
-### `useEnfyraApi<T>(path, options)`
+### `useEnfyra()`
 
-Main composable for API requests with both SSR and client-side support.
+Get the base URL and API prefix for building your own API requests.
 
 ```typescript
-// SSR Mode - Runs immediately (like useFetch)
-const { data, pending, error, refresh } = useEnfyraApi('/endpoint', {
-  ssr: true,
-  key: 'cache-key', // Optional
-  method: 'get',
-  query: { page: 1 }
-});
-// ⚠️  Returns useFetch result: { data, pending, error, refresh }
+const { baseUrl, apiPrefix } = useEnfyra();
 
-// Client Mode - Manual execution  
-const { data, pending, error, execute } = useEnfyraApi('/endpoint', {
-  method: 'post',
-  errorContext: 'Create Resource'
-});
-// ⚠️  Returns custom result: { data, pending, error, execute }
-
-await execute({ 
-  body: { name: 'New Item' },
-  id: '123'  // For /endpoint/123
-});
+// baseUrl: "http://localhost:3001/enfyra/api"
+// apiPrefix: "/enfyra/api"
 ```
 
-**Options:**
-- `ssr?: boolean` - Enable server-side rendering mode (executes immediately like useFetch)
-- `method?: 'get' | 'post' | 'patch' | 'delete'` - HTTP method
-- `body?: any` - Request body (POST/PATCH)
-- `query?: Record<string, any>` - URL query parameters
-- `headers?: Record<string, string>` - Custom headers
-- `errorContext?: string` - Error context for logging
-- `onError?: (error: ApiError, context?: string) => void` - Custom error handler
-- `key?: string` - Cache key (SSR mode, optional)
-- `default?: () => T` - Default value (SSR mode only)
-
-**Batch Options (only available for PATCH, DELETE, and POST methods):**
-- `batchSize?: number` - Batch size for chunking large operations (default: no limit)
-- `concurrent?: number` - Maximum concurrent requests (default: no limit)
-- `onProgress?: (progress: BatchProgress) => void` - Real-time progress callback for batch operations
-
-> 🎯 **TypeScript Smart:** Batch options (`batchSize`, `concurrent`, `onProgress`) are only available in TypeScript IntelliSense when using methods that support batch operations (PATCH, DELETE, POST). For GET and PUT methods, these options won't appear in autocomplete.
-
-**⚠️ Important: Return Types Differ**
-- **SSR Mode**: Returns `useFetch` result `{ data, pending, error, refresh }`
-- **Client Mode**: Returns custom result `{ data, pending, error, execute }`
-
-**Execute Options (Client mode only):**
-
-**Basic Options:**
-- `id?: string | number` - Single resource ID
-- `body?: any` - Override request body
-
-**Batch Options (only when using `ids` or `files`):**
-- `ids?: (string | number)[]` - Batch operation IDs (PATCH/DELETE)
-- `files?: FormData[]` - Array of FormData objects for batch upload (POST)
-- `batchSize?: number` - Override batch size for this execution
-- `concurrent?: number` - Override concurrent limit for this execution
-- `onProgress?: (progress: BatchProgress) => void` - Override progress callback for this execution
-
-> 🎯 **TypeScript Smart:** Batch execute options (`batchSize`, `concurrent`, `onProgress`) are only available when you provide `ids` or `files` parameters, ensuring type safety.
+**Returns:**
+- `baseUrl: string` - Full base URL including app URL and API prefix
+- `apiPrefix: string` - API prefix path (e.g., "/enfyra/api")
 
 ### `useEnfyraAuth()`
 
@@ -215,174 +186,78 @@ me.value          // Current user data (reactive)
 isLoggedIn.value  // Auth status (computed)
 
 // Methods  
-await login({ email, password })  // Login user
-await logout()                    // Logout user  
-await fetchUser()                 // Refresh user data
+await login({ email, password })                    // Login user
+await logout()                                      // Logout user  
+await fetchUser({ fields?: string[] })             // Refresh user data with optional fields
+```
+
+**Login:**
+```typescript
+const response = await login({
+  email: 'user@example.com',
+  password: 'password123',
+  remember: true // Optional
+});
+```
+
+**Fetch User:**
+```typescript
+// Fetch all user fields
+await fetchUser();
+
+// Fetch specific fields only
+await fetchUser({ 
+  fields: ['id', 'email', 'role', 'allowedRoutePermissions'] 
+});
 ```
 
 ## Advanced Usage
 
-### Batch Operations
+### Building Custom Composables
+
+Since you have access to `baseUrl`, you can build your own composables using Nuxt's built-in utilities:
 
 ```typescript
-// Basic batch delete - unlimited parallel requests
-// 🎯 Note: Batch options only appear in IntelliSense for DELETE method
-const { execute: deleteItems } = useEnfyraApi('/items', {
-  method: 'delete',
-  errorContext: 'Delete Items'
-});
-
-await deleteItems({ ids: ['1', '2', '3'] });
-
-// Advanced batch operations with concurrency control  
-// 🎯 TypeScript shows batch options (batchSize, concurrent, onProgress) for DELETE method
-const { execute: deleteMany } = useEnfyraApi('/users', {
-  method: 'delete',
-  batchSize: 10,      // ✅ Available: DELETE method supports batching
-  concurrent: 3,      // ✅ Available: DELETE method supports batching  
-  onProgress: (progress) => {  // ✅ Available: DELETE method supports batching
-    console.log(`Deleting: ${progress.completed}/${progress.total}`);
-  },
-  onError: (error, context) => toast.error(`${context}: ${error.message}`)
-});
-
-// GET method example - batch options NOT available
-// 🎯 TypeScript won't show batch options for GET method
-const { execute: getUsers } = useEnfyraApi('/users', {
-  method: 'get',
-  // batchSize: 10,      // ❌ Not available: GET doesn't support batching
-  // concurrent: 3,      // ❌ Not available: GET doesn't support batching
-  // onProgress: () => {}  // ❌ Not available: GET doesn't support batching
-  errorContext: 'Fetch Users'
-});
-
-// Delete 100 users in controlled batches
-await deleteMany({ ids: Array.from({length: 100}, (_, i) => `user-${i}`) });
-
-// Override batch settings per execution
-// 🎯 TypeScript shows batch options for PATCH method
-const { execute: updateUsers } = useEnfyraApi('/users', {
-  method: 'patch',
-  batchSize: 20,     // ✅ Available: PATCH method supports batching
-  concurrent: 5      // ✅ Available: PATCH method supports batching
-});
-
-// This execution uses different settings
-// 🎯 Batch options in execute() only available when using `ids` or `files`
-await updateUsers({ 
-  ids: largeUserList,           // ✅ Triggers batch mode
-  body: { status: 'active' },
-  batchSize: 50,     // ✅ Available: Using `ids` parameter  
-  concurrent: 10,    // ✅ Available: Using `ids` parameter
-  onProgress: (progress) => {   // ✅ Available: Using `ids` parameter
-    console.log(`Updating: ${progress.completed}/${progress.total}`);
-  }
-});
-
-// Single operation - batch options NOT available in execute
-await updateUsers({
-  id: 'single-user-id',         // ❌ Single operation, no batch options
-  body: { status: 'active' }
-  // batchSize: 50,             // ❌ Not available: Not using `ids` or `files`
-  // concurrent: 10,            // ❌ Not available: Not using `ids` or `files`  
-  // onProgress: () => {}       // ❌ Not available: Not using `ids` or `files`
-});
-
-// Batch file upload with real-time progress tracking
-const progressState = ref({
-  progress: 0,
-  completed: 0,
-  total: 0,
-  failed: 0,
-  estimatedTimeRemaining: 0,
-  operationsPerSecond: 0
-});
-
-// 🎯 TypeScript shows batch options for POST method (supports file uploads)
-const { execute: uploadFiles } = useEnfyraApi('/file_definition', {
-  method: 'post',
-  batchSize: 5,      // ✅ Available: POST method supports batching for files
-  concurrent: 2,     // ✅ Available: POST method supports batching for files
-  errorContext: 'Upload Files',
-  onProgress: (progress) => {  // ✅ Available: POST method supports batching
-    progressState.value = progress;
-    console.log(`Progress: ${progress.progress}% (${progress.completed}/${progress.total})`);
-    console.log(`ETA: ${Math.round((progress.estimatedTimeRemaining || 0) / 1000)}s`);
-    console.log(`Speed: ${progress.operationsPerSecond?.toFixed(1)} ops/sec`);
-  }
-});
-
-// Convert files to FormData array (matches enfyra_app pattern)
-const formDataArray = selectedFiles.map(file => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('folder', folderId || 'null');
-  return formData;
-});
-
-await uploadFiles({ 
-  files: formDataArray // Array of FormData objects
-});
-
-// Real-time progress tracking with detailed results
-const { execute: processData } = useEnfyraApi('/process', {
-  method: 'post',
-  batchSize: 10,
-  concurrent: 3,
-  onProgress: (progress) => {
-    // Display progress bar
-    updateProgressBar(progress.progress);
-    
-    // Show detailed metrics
-    console.log('Batch Progress:', {
-      percentage: progress.progress,
-      completed: progress.completed,
-      total: progress.total,
-      failed: progress.failed,
-      currentBatch: progress.currentBatch,
-      totalBatches: progress.totalBatches,
-      averageTime: progress.averageTime,
-      estimatedTimeRemaining: progress.estimatedTimeRemaining,
-      operationsPerSecond: progress.operationsPerSecond
+// composables/useUsers.ts
+export const useUsers = () => {
+  const { baseUrl } = useEnfyra();
+  
+  // SSR mode with useFetch
+  const getUsers = (options?: { page?: number; limit?: number }) => {
+    return useFetch(`${baseUrl}/users`, {
+      key: `users-${options?.page || 1}`,
+      query: options
     });
-    
-    // Handle individual results
-    progress.results.forEach(result => {
-      if (result.status === 'failed') {
-        console.error(`Item ${result.index} failed:`, result.error);
-      }
+  };
+  
+  // Client mode with $fetch
+  const createUser = async (userData: any) => {
+    return await $fetch(`${baseUrl}/users`, {
+      method: 'POST',
+      body: userData
     });
-  }
-});
-
-await processData({ 
-  ids: largeDataSet,
-  body: processingOptions 
-});
-```
-
-### Real-time Progress Interface
-
-```typescript
-interface BatchProgress {
-  progress: number;                    // 0-100 percentage
-  completed: number;                   // Number of completed operations
-  total: number;                       // Total number of operations
-  failed: number;                      // Number of failed operations
-  inProgress: number;                  // Operations currently running
-  estimatedTimeRemaining?: number;     // Milliseconds remaining
-  averageTime?: number;                // Average time per operation (ms)
-  currentBatch: number;               // Current batch being processed
-  totalBatches: number;               // Total number of batches
-  operationsPerSecond?: number;       // Processing speed
-  results: Array<{                    // Detailed results
-    index: number;
-    status: 'completed' | 'failed';
-    result?: any;
-    error?: ApiError;
-    duration?: number;
-  }>;
-}
+  };
+  
+  const updateUser = async (id: string, userData: any) => {
+    return await $fetch(`${baseUrl}/users/${id}`, {
+      method: 'PATCH',
+      body: userData
+    });
+  };
+  
+  const deleteUser = async (id: string) => {
+    return await $fetch(`${baseUrl}/users/${id}`, {
+      method: 'DELETE'
+    });
+  };
+  
+  return {
+    getUsers,
+    createUser,
+    updateUser,
+    deleteUser
+  };
+};
 ```
 
 ### TypeScript Integration
@@ -401,24 +276,23 @@ interface ApiResponse<T> {
 }
 
 // Use with full type safety
-const { data } = useEnfyraApi<ApiResponse<User>>('/users', {
-  ssr: true
-});
+const { baseUrl } = useEnfyra();
+const { data } = await useFetch<ApiResponse<User>>(`${baseUrl}/users`);
 
 // TypeScript knows data.value is ApiResponse<User> | null
 const users = computed(() => data.value?.data || []);
 ```
 
-### Reactive Parameters
+### Reactive Parameters with `useFetch`
 
 ```typescript
+const { baseUrl } = useEnfyra();
 const searchQuery = ref('');
 const page = ref(1);
 
-// SSR mode with reactive query (executes immediately)
-const { data, refresh } = useEnfyraApi('/users', {
-  ssr: true,
-  key: () => `users-${page.value}-${searchQuery.value}`, // Optional
+// SSR mode with reactive query
+const { data, refresh } = await useFetch(`${baseUrl}/users`, {
+  key: () => `users-${page.value}-${searchQuery.value}`,
   query: computed(() => ({
     search: searchQuery.value,
     page: page.value,
@@ -429,24 +303,6 @@ const { data, refresh } = useEnfyraApi('/users', {
 // Watch for changes and refresh
 watch([searchQuery, page], () => refresh());
 ```
-
-## Documentation
-
-For comprehensive guides and examples:
-
-📚 **[useEnfyraApi Complete Guide](https://github.com/dothinh115/enfyra-sdk-nuxt/blob/main/docs/useEnfyraApi.md)** - API client composable with SSR support, batch operations, and error handling
-
-🔐 **[useEnfyraAuth Complete Guide](https://github.com/dothinh115/enfyra-sdk-nuxt/blob/main/docs/useEnfyraAuth.md)** - Authentication composable with user management and login/logout functionality
-
-Key topics covered:
-- SSR vs Client Mode comparison
-- Authentication and headers forwarding  
-- Batch operations and CRUD patterns
-- User management and authentication flows
-- Error handling best practices
-- TypeScript integration
-- Performance optimization
-- Migration guides
 
 ## Configuration
 
@@ -460,8 +316,8 @@ export default defineNuxtConfig({
     // Required: Main API URL
     apiUrl: process.env.ENFYRA_API_URL || "http://localhost:1105",
     
-    // Required: App URL for SSR requests  
-    appUrl: process.env.ENFYRA_APP_URL || "http://localhost:3001",
+    // Optional: API prefix (defaults to "/enfyra/api")
+    apiPrefix: "/enfyra/api",
   },
 })
 ```
@@ -471,96 +327,72 @@ export default defineNuxtConfig({
 ```bash
 # .env
 ENFYRA_API_URL=https://api.enfyra.com
-ENFYRA_APP_URL=https://app.enfyra.com
 ```
 
 ## Best Practices
 
-### 1. Choose the Right Mode
+### 1. Use `useFetch` for SSR Data
 
 ```typescript
-// ✅ Use SSR for initial page data (runs immediately)
-const { data } = useEnfyraApi('/dashboard', {
-  ssr: true,
-  key: 'dashboard' // Optional
-});
-
-// ✅ Use Client mode for user interactions (manual execution)
-const { execute: saveData } = useEnfyraApi('/settings', {
-  method: 'patch',
-  errorContext: 'Save Settings'  
+// ✅ Use useFetch for initial page data (runs immediately, SSR support)
+const { baseUrl } = useEnfyra();
+const { data } = await useFetch(`${baseUrl}/dashboard`, {
+  key: 'dashboard'
 });
 ```
 
-### 2. Proper Error Handling
+### 2. Use `$fetch` for Client Actions
 
 ```typescript
-// ✅ Check error state (don't use try-catch)
-async function handleSubmit() {
-  await execute({ body: formData });
-  
-  if (error.value) {
-    return; // Error already logged
+// ✅ Use $fetch for user interactions (manual execution)
+const { baseUrl } = useEnfyra();
+
+async function saveSettings(settings: any) {
+  try {
+    await $fetch(`${baseUrl}/settings`, {
+      method: 'PATCH',
+      body: settings
+    });
+    toast.success('Saved successfully');
+  } catch (error) {
+    toast.error('Failed to save');
   }
-  
-  // Success handling
-  toast.success('Saved successfully');
 }
 ```
 
-### 3. Type Safety
+### 3. Build Reusable Composables
 
 ```typescript
-// ✅ Define interfaces for API responses
-interface CreateUserResponse {
-  data: User;
-  message: string;
-}
-
-const { execute } = useEnfyraApi<CreateUserResponse>('/users', {
-  method: 'post'
-});
+// ✅ Create reusable composables for your API endpoints
+export const useProducts = () => {
+  const { baseUrl } = useEnfyra();
+  
+  return {
+    list: (query?: any) => useFetch(`${baseUrl}/products`, { query }),
+    get: (id: string) => useFetch(`${baseUrl}/products/${id}`),
+    create: (data: any) => $fetch(`${baseUrl}/products`, { method: 'POST', body: data }),
+    update: (id: string, data: any) => $fetch(`${baseUrl}/products/${id}`, { method: 'PATCH', body: data }),
+    delete: (id: string) => $fetch(`${baseUrl}/products/${id}`, { method: 'DELETE' }),
+  };
+};
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Headers not forwarded in SSR** - Ensure `ssr: true` is set
-2. **Batch operations not working** - Only available in Client mode  
-3. **Data not reactive** - Use computed refs for reactive parameters
-4. **TypeScript errors** - Check return type differences between modes
+1. **Base URL is empty** - Ensure `apiUrl` is configured in `nuxt.config.ts`
+2. **Assets not loading** - Check that `/assets/**` routes are accessible
+3. **Authentication not working** - Verify cookies are being set and forwarded
 
 ### Performance Tips
 
-- Use SSR for initial data loading (better SEO, faster page loads)
-- Use Client mode for user interactions (better UX)
-- Implement proper cache keys to avoid over-caching
-- Group related operations with batch APIs
+- Use `useFetch` with cache keys for SSR data (better SEO, faster page loads)
+- Use `$fetch` for user interactions (better UX)
+- Build reusable composables to avoid code duplication
+- Leverage Nuxt's built-in caching with `useFetch` keys
 
 ## Development
-
-### Testing
-
-The SDK includes a comprehensive test suite using Vitest:
-
-```bash
-# Run tests once
-npm run test:run
-
-# Run tests in watch mode
-npm test
-
-# Run tests with UI
-npm run test:ui
-```
-
-**Test Coverage:**
-- ✅ **Extension naming utilities** - UUID generation and validation
-- ✅ **Vue SFC validation** - Syntax and structure validation  
-- ✅ **JS bundle validation** - Syntax and export validation
-- ✅ **Extension processing** - Complete workflow testing
-- ✅ **35 test cases** covering all edge cases and error handling
 
 ### Building
 
@@ -580,13 +412,8 @@ MIT
 
 Pull requests are welcome! Please read our contributing guidelines and ensure tests pass before submitting.
 
-## Changelog
-
-See [CHANGELOG.md](https://github.com/dothinh115/enfyra-sdk-nuxt/blob/main/CHANGELOG.md) for a detailed history of changes and migration guides.
-
 ## Support
 
 For issues and questions:
-- 📖 Check the [detailed documentation](https://github.com/dothinh115/enfyra-sdk-nuxt/blob/main/docs/useEnfyraApi.md)
-- 🐛 [Report bugs](https://github.com/dothinh115/enfyra-sdk-nuxt/issues)
-- 💬 [GitHub Discussions](https://github.com/dothinh115/enfyra-sdk-nuxt/discussions)
+- 🐛 [Report bugs](https://github.com/enfyra/sdk-nuxt/issues)
+- 💬 [GitHub Discussions](https://github.com/enfyra/sdk-nuxt/discussions)

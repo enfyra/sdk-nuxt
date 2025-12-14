@@ -1,32 +1,55 @@
 import { ref, computed } from "vue";
 import type { LoginPayload, User, UseEnfyraAuthReturn } from "../../types/auth";
-import { useEnfyraApi } from "./useEnfyraApi";
+import { $fetch } from "../utils/http";
+import { useEnfyra } from "./useEnfyra";
 
 const me = ref<User | null>(null);
 const isLoading = ref<boolean>(false);
 
-export function useEnfyraAuth() {
-  const {
-    data: loginData,
-    execute: executeLogin,
-    error: loginError,
-  } = useEnfyraApi("/login", {
-    method: "post",
-    errorContext: "Login",
-  });
+export function useEnfyraAuth(): UseEnfyraAuthReturn {
+  const { baseUrl } = useEnfyra();
 
-  const { execute: executeLogout } = useEnfyraApi("/logout", {
-    method: "post",
-    errorContext: "Logout",
-  });
+  const login = async (payload: LoginPayload) => {
+    isLoading.value = true;
 
-  const {
-    data: meData,
-    execute: executeFetchUser,
-    error: fetchUserError,
-  } = useEnfyraApi("/me", {
-    errorContext: "Fetch User Profile",
-  });
+    try {
+      const response = await $fetch(`${baseUrl}/login`, {
+        method: "POST",
+        body: payload,
+      });
+
+      me.value = (response as any)?.data?.[0] || null;
+      return response;
+    } catch (error) {
+      console.error("[Enfyra Auth] Login error:", error);
+      return null;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const logout = async () => {
+    isLoading.value = true;
+
+    try {
+      await $fetch(`${baseUrl}/logout`, {
+        method: "POST",
+      });
+      me.value = null;
+
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("[Enfyra Auth] Logout error:", error);
+      me.value = null;
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
   const fetchUser = async (options?: { fields?: string[] }) => {
     isLoading.value = true;
@@ -38,58 +61,22 @@ export function useEnfyraAuth() {
         queryParams.fields = options.fields.join(",");
       }
 
-      await executeFetchUser({
+      const response = await $fetch(`${baseUrl}/me`, {
+        method: "GET",
         query: queryParams,
       });
 
-      if (fetchUserError.value) {
-        me.value = null;
-        return;
-      }
-
-      me.value = (meData.value as any)?.data?.[0];
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const login = async (payload: LoginPayload) => {
-    isLoading.value = true;
-
-    try {
-      await executeLogin({ body: payload });
-
-      if (loginError.value) {
-        return null;
-      }
-
-      return loginData.value;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const logout = async () => {
-    isLoading.value = true;
-
-    try {
-      await executeLogout();
-      me.value = null;
-
-      if (typeof window !== "undefined") {
-        window.location.reload();
-      }
+      me.value = (response as any)?.data?.[0] || null;
     } catch (error) {
+      console.error("[Enfyra Auth] Fetch user error:", error);
       me.value = null;
-      if (typeof window !== "undefined") {
-        window.location.reload();
-      }
     } finally {
       isLoading.value = false;
     }
   };
 
   const isLoggedIn = computed(() => !!me.value);
+
   return {
     me,
     login,

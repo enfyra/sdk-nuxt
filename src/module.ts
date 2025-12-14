@@ -89,8 +89,8 @@ export default defineNuxtModule<ModuleOptions>({
 
     addImports([
       {
-        name: "useEnfyraApi",
-        from: resolve("./runtime/composables/useEnfyraApi"),
+        name: "useEnfyra",
+        from: resolve("./runtime/composables/useEnfyra"),
       },
       {
         name: "useEnfyraAuth",
@@ -100,18 +100,13 @@ export default defineNuxtModule<ModuleOptions>({
     addTypeTemplate({
       filename: "types/enfyra-sdk.d.ts",
       getContents: () => `
-import type { ApiOptions, UseEnfyraApiSSRReturn, UseEnfyraApiClientReturn } from '@enfyra/sdk-nuxt/types'
-
 declare module '#imports' {
-  export function useEnfyraApi<T = any>(
-    path: (() => string) | string,
-    opts: ApiOptions<T> & { ssr: true }
-  ): UseEnfyraApiSSRReturn<T>
+  export interface UseEnfyraReturn {
+    baseUrl: string;
+    apiPrefix: string;
+  }
 
-  export function useEnfyraApi<T = any>(
-    path: (() => string) | string,
-    opts?: ApiOptions<T> & { ssr?: false | undefined }
-  ): UseEnfyraApiClientReturn<T>
+  export function useEnfyra(): UseEnfyraReturn
 
   export function useEnfyraAuth(): import('@enfyra/sdk-nuxt/types').UseEnfyraAuthReturn
 }
