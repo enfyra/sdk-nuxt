@@ -137,6 +137,9 @@ export function useEnfyraApi<T = any>(
     if (opts.dedupe !== undefined) {
       fetchOptions.dedupe = opts.dedupe;
     }
+    if (opts.cache !== undefined) {
+      fetchOptions.cache = opts.cache;
+    }
 
     const result = useFetch<T>(finalUrl, fetchOptions);
 

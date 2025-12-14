@@ -76,6 +76,8 @@ interface BaseApiOptions<T> {
   refreshInterval?: number;
   /** Deduplication key - Only applies when ssr: true */
   dedupe?: string;
+  /** Cache mode for the fetch request - Only applies when ssr: true */
+  cache?: RequestCache;
 }
 
 interface BatchApiOptions {
