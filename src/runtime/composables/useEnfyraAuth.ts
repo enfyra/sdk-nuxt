@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 import type { LoginPayload, User, UseEnfyraAuthReturn } from "../../types/auth";
-import { $fetch } from "../utils/http";
+import { $fetch } from "ofetch";
 import { useEnfyra } from "./useEnfyra";
 
 const me = ref<User | null>(null);
@@ -13,9 +13,10 @@ export function useEnfyraAuth(): UseEnfyraAuthReturn {
     isLoading.value = true;
 
     try {
-      const response = await $fetch(`${baseUrl}/login`, {
+      const response = await $fetch("/login", {
         method: "POST",
         body: payload,
+        baseURL: baseUrl,
       });
 
       me.value = (response as any)?.data?.[0] || null;
@@ -32,8 +33,9 @@ export function useEnfyraAuth(): UseEnfyraAuthReturn {
     isLoading.value = true;
 
     try {
-      await $fetch(`${baseUrl}/logout`, {
+      await $fetch("/logout", {
         method: "POST",
+        baseURL: baseUrl,
       });
       me.value = null;
 
@@ -61,9 +63,10 @@ export function useEnfyraAuth(): UseEnfyraAuthReturn {
         queryParams.fields = options.fields.join(",");
       }
 
-      const response = await $fetch(`${baseUrl}/me`, {
+      const response = await $fetch("/me", {
         method: "GET",
         query: queryParams,
+        baseURL: baseUrl,
       });
 
       me.value = (response as any)?.data?.[0] || null;
