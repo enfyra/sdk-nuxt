@@ -12,6 +12,19 @@ export function proxyToAPI(event: H3Event, customPath?: string) {
 
   const headers = event.context.proxyHeaders || {};
 
+  // Detect WebSocket upgrade request
+  const isWebSocket = event.headers.get('upgrade')?.toLowerCase() === 'websocket';
+
+  if (isWebSocket) {
+    return proxyRequest(event, targetUrl, {
+      headers,
+      fetchOptions: {
+        // @ts-ignore - duplex is required for WebSocket in Node fetch
+        duplex: 'half',
+      },
+    }) as any;
+  }
+
   return proxyRequest(event, targetUrl, {
     headers,
   });
