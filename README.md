@@ -157,7 +157,20 @@ The SDK automatically proxies all asset requests to your backend. Simply use `/a
 - Supports all asset types: images, videos, documents, etc.
 - Maintains proper authentication headers
 
-## Core Composables
+## Available Composables
+
+### `useEnfyraApi()`
+
+**[See Documentation](./docs/useEnfyraApi.md)**
+
+API composable with SSR support, error handling, and batch operations.
+
+```typescript
+const { data, pending, execute } = useEnfyraApi('/users', {
+  method: 'get',
+  errorContext: 'Fetch Users'
+});
+```
 
 ### `useEnfyra()`
 
@@ -175,6 +188,8 @@ const { baseUrl, apiPrefix } = useEnfyra();
 - `apiPrefix: string` - API prefix path (e.g., "/enfyra/api")
 
 ### `useEnfyraAuth()`
+
+**[See Documentation](./docs/useEnfyraAuth.md)**
 
 Authentication composable with reactive state management.
 
