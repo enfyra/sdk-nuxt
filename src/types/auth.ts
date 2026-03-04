@@ -1,5 +1,7 @@
 import type { Ref } from 'vue'
 
+export type OAuthProvider = 'google' | 'facebook' | 'github'
+
 export interface User {
   id: string
   email: string
@@ -33,4 +35,5 @@ export interface UseEnfyraAuthReturn {
   logout: () => Promise<void>
   fetchUser: (options?: { fields?: string[] }) => Promise<void>
   isLoggedIn: Ref<boolean>
+  oauthLogin: (provider: OAuthProvider) => void
 }

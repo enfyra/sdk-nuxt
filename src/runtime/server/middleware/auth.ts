@@ -7,9 +7,13 @@ import {
 import { REFRESH_TOKEN_KEY } from "../../constants/auth";
 
 export default defineEventHandler(async (event) => {
+  const url = event.node.req.url || "";
+
+  // Skip token validation for auth endpoints
   if (
-    event.node.req.url === "/api/login" ||
-    event.node.req.url === "/api/logout"
+    url === "/api/login" ||
+    url === "/api/logout" ||
+    url.startsWith("/api/auth/")
   ) {
     return;
   }

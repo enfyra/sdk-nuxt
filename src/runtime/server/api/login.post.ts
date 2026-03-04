@@ -50,9 +50,10 @@ export default defineEventHandler(async (event) => {
     let errorCode = "AUTHENTICATION_ERROR";
 
     if (errorData?.error) {
-      errorMessage =
-        errorData.error.message || errorData.message || errorMessage;
-      errorCode = errorData.error.code || errorCode;
+      const msg = errorData.error.message || errorData.message;
+      errorMessage = typeof msg === "string" ? msg : errorMessage;
+      const code = errorData.error.code;
+      errorCode = typeof code === "string" ? code : errorCode;
     }
 
     return sendError(

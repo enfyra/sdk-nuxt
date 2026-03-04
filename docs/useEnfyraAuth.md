@@ -7,6 +7,7 @@ This guide explains how to use the `useEnfyraAuth` composable for authentication
 The `useEnfyraAuth` composable provides authentication functionality with:
 
 - ✅ **User Management**: Login, logout, and fetch user data
+- ✅ **OAuth Support**: Login with Google, Facebook, GitHub
 - ✅ **Reactive State**: Reactive user state and loading indicators
 - ✅ **Dynamic Fields**: Fetch specific user fields as needed
 - ✅ **Authentication Status**: Built-in `isLoggedIn` computed property
@@ -15,7 +16,7 @@ The `useEnfyraAuth` composable provides authentication functionality with:
 ## Basic Usage
 
 ```typescript
-const { me, login, logout, fetchUser, isLoggedIn } = useEnfyraAuth();
+const { me, login, logout, fetchUser, isLoggedIn, oauthLogin } = useEnfyraAuth();
 ```
 
 ## API Reference
@@ -26,10 +27,13 @@ const { me, login, logout, fetchUser, isLoggedIn } = useEnfyraAuth();
 interface UseEnfyraAuthReturn {
   me: Ref<User | null>                                        // Current user data
   login: (payload: LoginPayload) => Promise<any>              // Login function
-  logout: () => Promise<void>                                 // Logout function  
+  logout: () => Promise<void>                                 // Logout function
   fetchUser: (options?: { fields?: string[] }) => Promise<void> // Fetch user data
   isLoggedIn: Ref<boolean>                                    // Authentication status
+  oauthLogin: (provider: OAuthProvider) => void                // OAuth login function
 }
+
+type OAuthProvider = 'google' | 'facebook' | 'github'
 ```
 
 ### User Interface

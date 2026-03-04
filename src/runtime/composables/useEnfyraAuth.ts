@@ -1,5 +1,5 @@
 import { ref, computed } from "vue";
-import type { LoginPayload, User, UseEnfyraAuthReturn } from "../../types/auth";
+import type { LoginPayload, User, UseEnfyraAuthReturn, OAuthProvider } from "../../types/auth";
 import { $fetch } from "ofetch";
 import { useEnfyra } from "./useEnfyra";
 
@@ -80,11 +80,22 @@ export function useEnfyraAuth(): UseEnfyraAuthReturn {
 
   const isLoggedIn = computed(() => !!me.value);
 
+  const oauthLogin = (provider: OAuthProvider) => {
+    if (typeof window === "undefined") {
+      console.error("[Enfyra Auth] oauthLogin can only be called on the client side");
+      return;
+    }
+
+    const currentUrl = window.location.href;
+    window.location.href = `/api/auth/${provider}?redirect=${encodeURIComponent(currentUrl)}`;
+  };
+
   return {
     me,
     login,
     logout,
     fetchUser,
     isLoggedIn,
+    oauthLogin,
   } as const;
 }
