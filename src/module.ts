@@ -130,19 +130,7 @@ declare module '#imports' {
       method: "post",
     });
 
-    // OAuth routes
-    addServerHandler({
-      route: `${apiPrefix}/auth/:provider`,
-      handler: resolve("./runtime/server/api/auth/[provider].get"),
-      method: "get",
-    });
-
-    addServerHandler({
-      route: `${apiPrefix}/auth/:provider/callback`,
-      handler: resolve("./runtime/server/api/auth/[provider]/callback.get"),
-      method: "get",
-    });
-
+    // OAuth callback - sets cookies and redirects
     addServerHandler({
       route: `${apiPrefix}/auth/callback`,
       handler: resolve("./runtime/server/api/auth/callback.get"),
