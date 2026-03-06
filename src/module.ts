@@ -130,7 +130,6 @@ declare module '#imports' {
       method: "post",
     });
 
-    // OAuth callback - sets cookies and redirects
     addServerHandler({
       route: `${apiPrefix}/auth/callback`,
       handler: resolve("./runtime/server/api/auth/callback.get"),

@@ -7,7 +7,7 @@ const me = ref<User | null>(null);
 const isLoading = ref<boolean>(false);
 
 export function useEnfyraAuth(): UseEnfyraAuthReturn {
-  const { baseUrl } = useEnfyra();
+  const { baseUrl, apiPrefix } = useEnfyra();
 
   const login = async (payload: LoginPayload) => {
     isLoading.value = true;
@@ -87,7 +87,8 @@ export function useEnfyraAuth(): UseEnfyraAuthReturn {
     }
 
     const currentUrl = window.location.href;
-    window.location.href = `/api/auth/${provider}?redirect=${encodeURIComponent(currentUrl)}`;
+    const path = `${apiPrefix.replace(/\/+$/, "")}/auth/${provider}?redirect=${encodeURIComponent(currentUrl)}`;
+    window.location.href = path.startsWith("/") ? path : `/${path}`;
   };
 
   return {
