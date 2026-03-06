@@ -131,12 +131,6 @@ declare module '#imports' {
     });
 
     addServerHandler({
-      route: `${apiPrefix}/auth/callback`,
-      handler: resolve("./runtime/server/api/auth/callback.get"),
-      method: "get",
-    });
-
-    addServerHandler({
       route: "/assets/**",
       handler: resolve("./runtime/server/api/all"),
     });
