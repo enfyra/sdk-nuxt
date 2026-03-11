@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     setCookie(event, REFRESH_TOKEN_KEY, refreshToken, cookieOptions);
     setCookie(event, EXP_TIME_KEY, String(expTime), cookieOptions);
 
-    return { accessToken };
+    return response;
   } catch (err: any) {
     const statusCode = err?.response?.status || err?.statusCode || 401;
     const errorData = err?.response?._data || err?.data;
