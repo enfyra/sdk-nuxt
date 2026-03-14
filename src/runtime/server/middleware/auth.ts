@@ -7,12 +7,20 @@ import {
 import { REFRESH_TOKEN_KEY } from "../../constants/auth";
 
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
+  const apiPrefix = config.public.enfyraSDK?.apiPrefix;
+  if (!apiPrefix) return;
+
   const url = event.node.req.url || "";
 
+  const loginPath = `${apiPrefix}/login`;
+  const logoutPath = `${apiPrefix}/logout`;
+  const authPrefix = `${apiPrefix}/auth/`;
+
   if (
-    url === "/api/login" ||
-    url === "/api/logout" ||
-    url.startsWith("/api/auth/")
+    url === loginPath ||
+    url === logoutPath ||
+    url.startsWith(authPrefix)
   ) {
     return;
   }
