@@ -1,6 +1,6 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Nuxt module for Enfyra — SSR-safe client, composables, and cookie bridge proxy",
   "type": "module",
   "engines": {
