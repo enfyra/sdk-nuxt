@@ -8,6 +8,8 @@ Nuxt 3/4 module for Enfyra. Cookie-bridge auth, SSR-safe request-scoped client, 
 yarn add @enfyra/sdk-nuxt @enfyra/sdk-core
 ```
 
+Set `ENFYRA_APP_URL` in your environment — that's it:
+
 ```dotenv
 ENFYRA_APP_URL=https://admin.example.com
 ```
@@ -18,21 +20,27 @@ export default defineNuxtConfig({
 })
 ```
 
-No plugin, server middleware, route rule, or cookie handler needs to be written manually.
-
-## Options
+If you prefer config over env (e.g. for multi-tenant or per-environment overrides), set `enfyra.appUrl` instead — it takes precedence over the env var:
 
 ```ts
 export default defineNuxtConfig({
   modules: ['@enfyra/sdk-nuxt'],
   enfyra: {
     appUrl: 'https://admin.example.com',
-    routePrefix: '/enfyra',
   },
 })
 ```
 
-`appUrl` is private runtime configuration. Only `routePrefix` is exposed to the browser.
+No plugin, server middleware, route rule, or cookie handler needs to be written manually.
+
+## Options
+
+All options are optional. `appUrl` falls back to `ENFYRA_APP_URL` when omitted.
+
+| Option | Type | Default | Notes |
+|---|---|---|---|
+| `appUrl` | `string` | `process.env.ENFYRA_APP_URL` | Server-only. Overrides the env var when set. |
+| `routePrefix` | `string` | `'/enfyra'` | Exposed to browser as the cookie-bridge proxy prefix. |
 
 ## Composables
 
