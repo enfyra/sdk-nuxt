@@ -17,6 +17,8 @@ export default defineBuildConfig({
     '@enfyra/sdk-core',
     '@nuxt/kit',
     '@nuxt/schema',
+    'h3',
+    'undici',
   ],
   rollup: {
     emitCJS: false,

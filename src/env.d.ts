@@ -26,12 +26,26 @@ declare module '#app' {
   export function useNuxtApp(): NuxtApp;
 
   export function useRuntimeConfig(): {
-    enfyra: { appUrl: string; routePrefix: string };
+    enfyra: {
+      appUrl: string;
+      routePrefix: string;
+      proxy: { headersTimeout: number; bodyTimeout: number };
+    };
     public: { enfyra: { baseUrl: string } };
     [key: string]: unknown;
   };
 
   export function useState<T>(key: string, init?: () => T): Ref<T>;
+}
+
+declare module '#imports' {
+  export function useRuntimeConfig(): {
+    enfyra: {
+      appUrl: string;
+      routePrefix: string;
+      proxy: { headersTimeout: number; bodyTimeout: number };
+    };
+  };
 }
 
 interface ImportMeta {

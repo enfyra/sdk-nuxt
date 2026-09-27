@@ -1,6 +1,6 @@
 # @enfyra/sdk-nuxt
 
-Nuxt 3/4 module for Enfyra. Cookie-bridge auth, SSR-safe request-scoped client, and auto-imported composables.
+Nuxt 3/4 module for Enfyra. Cookie-bridge auth, SSR-safe request-scoped client, and auto-imported composables. Requires Node.js 22.19 or newer.
 
 ## Install
 
@@ -41,6 +41,22 @@ All options are optional. `appUrl` falls back to `ENFYRA_APP_URL` when omitted.
 |---|---|---|---|
 | `appUrl` | `string` | `process.env.ENFYRA_APP_URL` | Server-only. Overrides the env var when set. |
 | `routePrefix` | `string` | `'/enfyra'` | Exposed to browser as the cookie-bridge proxy prefix. |
+| `proxy.headersTimeout` | `number` | `300000` | Maximum milliseconds to wait for upstream response headers. Set to `0` to disable. |
+| `proxy.bodyTimeout` | `number` | `300000` | Maximum milliseconds of inactivity between upstream response body chunks. Set to `0` to disable. |
+
+The proxy defaults can be overridden per application without changing the process-wide fetch dispatcher:
+
+```ts
+export default defineNuxtConfig({
+  modules: ['@enfyra/sdk-nuxt'],
+  enfyra: {
+    proxy: {
+      headersTimeout: 650_000,
+      bodyTimeout: 650_000,
+    },
+  },
+})
+```
 
 ## Composables
 

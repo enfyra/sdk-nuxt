@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   addImports: vi.fn(),
   addPlugin: vi.fn(),
+  addServerHandler: vi.fn(),
 }));
 
 vi.mock('@nuxt/kit', () => ({
   addImports: mocks.addImports,
   addPlugin: mocks.addPlugin,
+  addServerHandler: mocks.addServerHandler,
   createResolver: () => ({ resolve: (path: string) => path }),
   defineNuxtModule: (definition: unknown) => definition,
 }));
@@ -50,16 +52,17 @@ describe('@enfyra/sdk-nuxt module', () => {
       enfyra: {
         appUrl: 'https://admin.enfyra.example',
         routePrefix: '/enfyra',
+        proxy: {
+          headersTimeout: 300_000,
+          bodyTimeout: 300_000,
+        },
       },
       public: { enfyra: { baseUrl: '/enfyra' } },
     });
-    expect(nuxt.options.routeRules).toEqual({
-      '/enfyra/**': {
-        proxy: {
-          to: 'https://admin.enfyra.example/api/**',
-          fetchOptions: { redirect: 'manual' },
-        },
-      },
+    expect(nuxt.options.routeRules).toEqual({});
+    expect(mocks.addServerHandler).toHaveBeenCalledWith({
+      route: '/enfyra/**',
+      handler: './runtime/server/proxy',
     });
     expect(mocks.addPlugin).toHaveBeenCalledWith('./runtime/plugin');
     expect(mocks.addImports).toHaveBeenCalledTimes(6);
@@ -87,6 +90,47 @@ describe('@enfyra/sdk-nuxt module', () => {
       name: 'useWebSocket',
       from: './runtime/composables/useWebSocket',
     });
+  });
+
+  it('uses caller proxy timeout overrides', () => {
+    const nuxt = createNuxt();
+    mod.setup(
+      {
+        appUrl: 'https://admin.enfyra.example',
+        proxy: {
+          headersTimeout: 650_000,
+          bodyTimeout: 0,
+        },
+      },
+      nuxt,
+    );
+
+    expect(nuxt.options.runtimeConfig).toMatchObject({
+      enfyra: {
+        proxy: {
+          headersTimeout: 650_000,
+          bodyTimeout: 0,
+        },
+      },
+    });
+  });
+
+  it.each([
+    ['headersTimeout', -1],
+    ['headersTimeout', 1.5],
+    ['bodyTimeout', Number.NaN],
+    ['bodyTimeout', Number.POSITIVE_INFINITY],
+  ])('rejects invalid proxy %s values', (field, value) => {
+    const nuxt = createNuxt();
+    expect(() =>
+      mod.setup(
+        {
+          appUrl: 'https://admin.enfyra.example',
+          proxy: { [field]: value },
+        },
+        nuxt,
+      ),
+    ).toThrow(`enfyra.proxy.${field} must be a non-negative integer`);
   });
 
   it('throws when appUrl is missing', () => {

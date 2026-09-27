@@ -1,10 +1,13 @@
 import {
   addImports,
   addPlugin,
+  addServerHandler,
   createResolver,
   defineNuxtModule,
 } from '@nuxt/kit';
 import type { EnfyraNuxtOptions } from './types';
+
+const DEFAULT_PROXY_TIMEOUT = 300_000;
 
 const COMPOSABLE_IMPORTS: Array<{ name: string; from: string }> = [
   { name: 'useEnfyra', from: './runtime/composables/useEnfyra' },
@@ -35,6 +38,13 @@ export default defineNuxtModule<EnfyraNuxtOptions>({
     }
 
     const routePrefix = normalizePrefix(options.routePrefix ?? '/enfyra');
+    const proxy = {
+      headersTimeout: resolveProxyTimeout(
+        options.proxy?.headersTimeout,
+        'headersTimeout',
+      ),
+      bodyTimeout: resolveProxyTimeout(options.proxy?.bodyTimeout, 'bodyTimeout'),
+    };
 
     const privateConfig = (nuxt.options.runtimeConfig.enfyra ?? {}) as Record<
       string,
@@ -44,6 +54,7 @@ export default defineNuxtModule<EnfyraNuxtOptions>({
       ...privateConfig,
       appUrl,
       routePrefix,
+      proxy,
     };
 
     const publicConfig = (nuxt.options.runtimeConfig.public.enfyra ??
@@ -61,14 +72,11 @@ export default defineNuxtModule<EnfyraNuxtOptions>({
     if (nuxtOptions.routeRules[routeRule]) {
       throw new Error(`Route rule ${routeRule} is already configured`);
     }
-    nuxtOptions.routeRules[routeRule] = {
-      proxy: {
-        to: `${appUrl}/api/**`,
-        fetchOptions: { redirect: 'manual' },
-      },
-    };
-
     const resolver = createResolver(import.meta.url);
+    addServerHandler({
+      route: routeRule,
+      handler: resolver.resolve('./runtime/server/proxy'),
+    });
     addPlugin(resolver.resolve('./runtime/plugin'));
     for (const { name, from } of COMPOSABLE_IMPORTS) {
       addImports({ name, from: resolver.resolve(from) });
@@ -81,4 +89,18 @@ function normalizePrefix(prefix: string): string {
   return normalized || '/';
 }
 
-export type { EnfyraNuxtOptions } from './types';
+function resolveProxyTimeout(
+  value: number | undefined,
+  field: 'headersTimeout' | 'bodyTimeout',
+): number {
+  if (value === undefined) return DEFAULT_PROXY_TIMEOUT;
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new Error(`enfyra.proxy.${field} must be a non-negative integer`);
+  }
+  return value;
+}
+
+export type {
+  EnfyraNuxtOptions,
+  EnfyraNuxtProxyOptions,
+} from './types';

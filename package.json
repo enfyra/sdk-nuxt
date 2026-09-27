@@ -1,11 +1,11 @@
 {
   "name": "@enfyra/sdk-nuxt",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Nuxt module for Enfyra — SSR-safe client, composables, and cookie bridge proxy",
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=18"
+    "node": ">=22.19.0"
   },
   "main": "./dist/module.mjs",
   "module": "./dist/module.mjs",
@@ -26,7 +26,9 @@
   },
   "dependencies": {
     "@enfyra/sdk-core": "0.1.12",
-    "@nuxt/kit": "^3.12.0"
+    "@nuxt/kit": "^3.12.0",
+    "h3": "^1.15.11",
+    "undici": "^8.10.0"
   },
   "peerDependencies": {
     "nuxt": ">=3.12.0 <5"
