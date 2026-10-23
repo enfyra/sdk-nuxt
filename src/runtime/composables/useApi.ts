@@ -1,11 +1,11 @@
 import { onMounted, readonly, ref, shallowRef } from 'vue';
-import { isEnfyraError } from '@enfyra/sdk-core';
-import type {
-  EnfyraError,
-  MutationOptions,
-  MutationParams,
-  QueryOptions,
-  RequestStatus,
+import {
+  isEnfyraError,
+  type EnfyraError,
+  type MutationOptions,
+  type MutationParams,
+  type QueryOptions,
+  type RequestStatus,
 } from '@enfyra/sdk-core';
 import { useEnfyra } from './useEnfyra';
 
@@ -102,8 +102,8 @@ export function useMutation<T = unknown>(
       let result: T | null = null;
 
       if (params.ids && params.ids.length > 0) {
-        const results = await Promise.all(
-          params.ids.map((id) => {
+        const settled = await Promise.allSettled(
+          params.ids.map(async (id) => {
             if (operation === 'delete')
               return client.from(table).byId(id).delete();
             return client
@@ -112,6 +112,10 @@ export function useMutation<T = unknown>(
               .update(params.data as never);
           }),
         );
+        const results = settled.map((entry) => {
+          if (entry.status === 'rejected') throw entry.reason;
+          return entry.value;
+        });
         result = results.map(
           (r) => (r as { data?: T } | undefined)?.data ?? null,
         ) as unknown as T;
@@ -122,12 +126,14 @@ export function useMutation<T = unknown>(
       } else if (operation === 'update') {
         if (params.id == null) throw new Error('id is required for update');
         result = (
-          await client.from<T>(table).byId(params.id).update(params.data as never)
+          await client
+            .from<T>(table)
+            .byId(params.id)
+            .update(params.data as never)
         ).data as T;
       } else {
-        result = (
-          await client.from<T>(table).insert(params.data as never)
-        ).data as T;
+        result = (await client.from<T>(table).insert(params.data as never))
+          .data as T;
       }
 
       data.value = result;

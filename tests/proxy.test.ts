@@ -4,6 +4,9 @@ import { getGlobalDispatcher } from 'undici';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import handler from '../src/runtime/server/proxy';
 
+let warn: ReturnType<typeof vi.spyOn>;
+const records = () => warn.mock.calls.filter(call => call[0] === '[EnfyraProxyDelivery]').map(call => JSON.parse(String(call[1])) as Record<string, any>);
+
 const servers: Server[] = [];
 const clients: AbortController[] = [];
 const config = vi.hoisted(() => ({
@@ -32,6 +35,7 @@ async function bridge() {
 }
 
 beforeEach(() => {
+  warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
   config.enfyra.proxy.headersTimeout = 300_000;
   config.enfyra.proxy.bodyTimeout = 300_000;
 });
@@ -42,9 +46,36 @@ afterEach(async () => {
     server.closeAllConnections();
     server.close(() => resolve());
   })));
+  warn.mockRestore();
 });
 
 describe('API proxy real transport', () => {
+  it('forwards the native socket polling path to the App websocket bridge', async () => {
+    let target = '';
+    config.enfyra.appUrl = await listen(createServer((request, response) => {
+      target = request.url ?? '';
+      response.end('0{}');
+    }));
+    const response = await fetch((await bridge()) + '/enfyra/socket.io/?EIO=4&transport=polling');
+    expect(await response.text()).toBe('0{}');
+    expect(target).toBe('/ws/socket.io/?EIO=4&transport=polling');
+  });
+  it('replaces caller hop identity without exposing linkage in the response', async () => {
+    const forged = '46f9cacd-e79f-46b4-8cae-78d207ced765';
+    let hop: unknown;
+    config.enfyra.appUrl = await listen(createServer((req, res) => {
+      hop = req.headers['x-enfyra-delivery-hop'];
+      res.setHeader('x-enfyra-delivery-hop', String(hop));
+      res.end('chào 👋');
+    }));
+    const response = await fetch((await bridge()) + '/enfyra/v1/models', { headers: { 'x-enfyra-delivery-hop': forged } });
+    expect(await response.text()).toBe('chào 👋');
+    expect(hop).toMatch(/^[0-9a-f-]{36}$/);
+    expect(hop).not.toBe(forged);
+    expect(response.headers.has('x-enfyra-delivery-hop')).toBe(false);
+    expect(records()).toEqual([]);
+  });
+
   it('does not replace the process-wide dispatcher', async () => {
     const globalDispatcher = getGlobalDispatcher();
     config.enfyra.appUrl = await listen(createServer((_req, res) => {
@@ -66,6 +97,8 @@ describe('API proxy real transport', () => {
     const response = await fetch((await bridge()) + '/enfyra/v1/images/generations');
 
     expect(response.status).toBe(502);
+    expect(records()).toHaveLength(1);
+    expect(records()[0]).toMatchObject({ hop: 'sdk', firstCause: { origin: 'upstream', phase: 'headers', code: 'UND_ERR_HEADERS_TIMEOUT' } });
   });
 
   it('enforces the configured response body inactivity timeout', async () => {
@@ -79,6 +112,8 @@ describe('API proxy real transport', () => {
     await expect(
       fetch((await bridge()) + '/enfyra/v1/images/generations').then(response => response.arrayBuffer()),
     ).rejects.toThrow();
+    await vi.waitFor(() => expect(records()).toHaveLength(1));
+    expect(records()[0]).toMatchObject({ firstCause: { origin: 'upstream', phase: 'body', code: 'UND_ERR_BODY_TIMEOUT' }, bytes: 5, chunks: 1 });
   });
 
   it('closes a silent upstream when the downstream request disconnects', async () => {
